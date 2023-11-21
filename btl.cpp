@@ -43,6 +43,7 @@ struct HoaDon
     string maHoaDon;
     string ngayLap;
     string khachHang;
+    string makhachhang;
     int soLoaiVatLieu;
     int tongTien = 0;
     string sdt;
@@ -85,6 +86,7 @@ HoaDon nhapHoaDon() {
     cout << "Ngay Lap: \t"; getline(cin, x.ngayLap);
     fflush(stdin);
     cout << "Khach hang: \t"; getline(cin, x.khachHang);
+    cout << "Ma khach hang: \t"; getline(cin, x.makhachhang);
     cout << "So dien thoai: \t"; getline(cin, x.sdt);
     cout << "So loai vat lieu: \t"; cin >> x.soLoaiVatLieu;
     for (int i = 0; i < x.soLoaiVatLieu; i++) {
@@ -185,6 +187,7 @@ void inHoaDon(HoaDon hd) {
     cout << left << setw(30) << "Ma hoa don: " << hd.maHoaDon << endl
          << left << setw(30) << "Ngay lap: " << hd.ngayLap << endl
          << left << setw(30) << "Khach hang: " << hd.khachHang << endl
+         << left << setw(30) << "Ma khach hang:" << hd.makhachhang << endl
          << left << setw(30) << "So loai vat lieu: " << hd.soLoaiVatLieu << endl;
     cout << "Danh sach vat lieu: \n";
     inDsVatLieu(hd.dsVatLieu, hd.dsVatLieu.size());
@@ -243,20 +246,30 @@ ListHD docFileHoaDon() {
     return listz;
 }
 
+string nhapkitu() 
+{
+    string x; cin >> x;
+    return x;
+}
+
 void Sua_vat_lieu_theo_ma_hoa_don(ListHD &list)
 {
     string maHoadon;
     string maVL;
-    cout << "Moi ban nhap ma hoa don can sua vat lieu:"; cin >> maHoadon;
+    cout << "Moi ban nhap ma hoa don can sua vat lieu:"; maHoadon = nhapkitu();
+
     Node* node = list.Head;
     while (node != NULL) {
         HoaDon hd = node -> info;
         if(hd.maHoaDon == maHoadon) 
         {
             inDsVatLieu(hd.dsVatLieu, hd.dsVatLieu.size());
-            cout << "Moi ban nhap ma vat lieu de sua vat lieu:"; cin >> maVL;
-            for(int i = 0; i < hd.dsVatLieu.size(); i++) {
-                if(hd.dsVatLieu[i].maVL == maVL) {
+            cout << "Moi ban nhap ma vat lieu de sua vat lieu:"; maVL = nhapkitu();
+
+            for(int i = 0; i < hd.dsVatLieu.size(); i++)
+            {
+                if(hd.dsVatLieu[i].maVL == maVL) 
+                {
                     VatLieu x = nhapVatLieu();
                     node->info.dsVatLieu[i] = x;
                     cout << "Sua thanh cong!\n";
@@ -271,7 +284,7 @@ void Sua_vat_lieu_theo_ma_hoa_don(ListHD &list)
 
 void Sua_hoa_don_theo_ma_hoa_don(ListHD &list){
     string maHD;
-    cout << "Moi ban nhap ma hoa don can sua:"; cin >> maHD;
+    cout << "Moi ban nhap ma hoa don can sua:"; maHD = nhapkitu();
     
     Node* node = list.Head;
     while (node != NULL)
@@ -284,11 +297,82 @@ void Sua_hoa_don_theo_ma_hoa_don(ListHD &list){
             node->info = hdsua;
             return;
         }
+        node = node -> next;
     }
-
     cout << "Khong tim thay\n";
-    
+}
 
+
+void Thay_doi_thong_tin_HD_theo_ma_KH(ListHD &list){
+    string maKH;
+    cout << "Nhap ma khach hang de sua:"; maKH = nhapkitu();
+    
+    Node* node = list.Head;
+    while (node != NULL)
+    {
+        HoaDon hd = node -> info;
+        if(hd.makhachhang == maKH) {
+            inHoaDon(hd);
+            HoaDon hdsua = nhapHoaDon();
+            node->info = hdsua;
+            return;
+        }
+        node = node -> next;
+    }
+    cout << "Khong tim thay\n"; 
+}
+
+void Tim_HD_theo_ma(ListHD list) {
+    string maHD;
+    cout << "Nhap ma hoa don de tim:"; maHD = nhapkitu();
+
+    Node* node = list.Head;
+    while (node != NULL)
+    {
+        HoaDon hd = node -> info;
+        if(hd.maHoaDon == maHD) {
+            inHoaDon(hd);
+            return;
+        }
+        node = node -> next;
+    }
+    cout << "Khong tim thay\n"; 
+}
+
+VatLieu VL_don_gia_cao_nhat(ListHD list)
+{
+    VatLieu max = list.Head->info.dsVatLieu[0];
+
+    Node* node = list.Head;
+    while (node != NULL)
+    {
+        HoaDon hd = node ->info;
+        for(int i = 0; i < hd.dsVatLieu.size(); i++) 
+        {
+            if(max.thanhTien < hd.dsVatLieu[i].thanhTien) 
+            {
+                max = hd.dsVatLieu[i];
+            }
+        }
+        node = node -> next;
+    }
+    return max;
+}
+
+HoaDon HD_tong_tien_cao_nhat(ListHD list)
+{
+    HoaDon HD = list.Head->info;
+
+    Node* node = list.Head;
+    while (node != NULL)
+    {
+        HoaDon hd = node ->info;
+        if(HD.tongTien < hd.tongTien) {
+            HD = hd;
+        }
+        node = node -> next;
+    }
+    return HD;
 }
 
 
@@ -300,13 +384,18 @@ void inMenu() {
          << "4. In danh sach hoa don.\n"
          << "5. Sua vat lieu mua theo ma hoa don.\n"
          << "6. Sua hoa don theo ma hoa don.\n"
-         << "7. Thay doi thong tin khach hang theo ma khach hang."
+         << "7. Thay doi thong tin hoa don theo ma khach hang.\n"
+         << "8.Tim kiem hoa don theo ma hoa don.\n"
+         << "9.Tim vat lieu co don gia cao nhat trong ma hoa don cu the"
+         << "10.Tim kiem hoa don co tong tien lon nhat"
          << "0. Nau an.\n"
          << "Nhap lua chon:\t";
 }
 
 void doMenu(ListHD &list) {
     int n;
+    VatLieu vl ;
+    HoaDon hd;
     do {
         inMenu();
         cin >> n;
@@ -340,6 +429,21 @@ void doMenu(ListHD &list) {
             break;
         case 6:
             Sua_hoa_don_theo_ma_hoa_don(list);
+            break;
+        case 7:
+            Thay_doi_thong_tin_HD_theo_ma_KH(list);
+            break;
+        case 8: 
+            Tim_HD_theo_ma(list);
+            break;
+        case 9:
+            vl = VL_don_gia_cao_nhat(list);
+            cout << "Vat lieu co don gia cao nhat la:" << vl.tenVL << endl;
+            break;
+        case 10:
+            hd = HD_tong_tien_cao_nhat(list);
+            cout << "Hoa don co tong tien cao nhat la:\n";
+            inHoaDon(hd);
             break;
         default:
             cout << "Lua chon khong hop le!\n";
