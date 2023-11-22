@@ -375,7 +375,156 @@ HoaDon HD_tong_tien_cao_nhat(ListHD list)
     return HD;
 }
 
+void SX_HD_tang_dan_theo_tong_tien(ListHD &list) 
+{
+     if (list.Head == NULL || list.Head->next == NULL) return; 
 
+    bool swapped;
+    Node *ptr1;
+    Node *lptr = NULL;
+
+    do {
+        swapped = false;
+        ptr1 = list.Head;
+
+        while (ptr1->next != lptr) {
+
+            if (ptr1->info.tongTien > ptr1->next->info.tongTien) {
+                HoaDon temp = ptr1->info;
+                ptr1->info = ptr1->next->info;
+                ptr1->next->info = temp;
+                swapped = true;
+            }
+            ptr1 = ptr1->next;
+        }
+        lptr = ptr1;
+    } while (swapped);
+}
+
+
+void SX_HD_tang_dan_theo_so_loai_vat_lieu(ListHD &list) 
+{
+     if (list.Head == NULL || list.Head->next == NULL) return; 
+
+    bool swapped;
+    Node *ptr1;
+    Node *lptr = NULL;
+
+    do {
+        swapped = false;
+        ptr1 = list.Head;
+
+        while (ptr1->next != lptr) {
+
+            if (ptr1->info.dsVatLieu.size() > ptr1->next->info.dsVatLieu.size()) {
+                HoaDon temp = ptr1->info;
+                ptr1->info = ptr1->next->info;
+                ptr1->next->info = temp;
+                swapped = true;
+            }
+            ptr1 = ptr1->next;
+        }
+        lptr = ptr1;
+    } while (swapped);
+}
+
+
+void SX_HD_giam_dan_theo_tong_tien(ListHD &list) 
+{
+    if (list.Head == NULL || list.Head->next == NULL) return; 
+
+    bool swapped;
+    Node *ptr1;
+    Node *lptr = NULL;
+
+    do {
+        swapped = false;
+        ptr1 = list.Head;
+
+        while (ptr1->next != lptr) {
+
+            if (ptr1->info.tongTien < ptr1->next->info.tongTien) {
+                HoaDon temp = ptr1->info;
+                ptr1->info = ptr1->next->info;
+                ptr1->next->info = temp;
+                swapped = true;
+            }
+            ptr1 = ptr1->next;
+        }
+        lptr = ptr1;
+    } while (swapped);
+}
+
+void Them_HD_Tang_dan_theo_tong_tien(ListHD &list)
+{
+    HoaDon hd;
+    hd = nhapHoaDon();
+    addTail(list, hd);
+    SX_HD_tang_dan_theo_tong_tien(list);
+}
+
+double Tong_tien_danh_sach_HD(ListHD list)
+{
+    double sum;
+
+    Node* node = list.Head;
+    while (node != NULL)
+    {
+        HoaDon hd = node ->info;
+        sum += hd.tongTien;
+        node = node -> next;
+    }
+    return sum;
+}
+
+string tachThang(string x) {
+    int dem = 0;
+
+    // Sử dụng istringstream để tách chuỗi
+    istringstream ss(x);
+    string thang;
+    while (getline(ss, thang, '/')) {
+        dem++;
+        if(dem == 1) return thang;
+    }
+    return 0;
+}
+
+
+double Doanh_thu_trong_thang(ListHD list)
+{
+    double sum;
+    string thang;
+    int dem = 0;
+    cout << "Nhap thang can lay doanh thu:";
+    thang = nhapkitu();
+    string thanghople[12] = {"01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"};
+    for(int i = 0; i < thanghople->size(); i++) {
+        if(thang != thanghople[i]) {
+            dem++;
+        }
+    }
+    if(dem == 12)  
+    { 
+        cout << "Khong hop le!";
+        return 1; 
+    }
+
+    
+    Node* node = list.Head;
+    while (node != NULL)
+    {
+        HoaDon hd = node ->info;
+        string thangHD = tachThang(hd.ngayLap);
+        if(thangHD == thang) 
+        {
+            sum += hd.tongTien;
+        }
+
+        node = node -> next;
+    }
+    return sum;
+}
 
 void inMenu() {
     cout << "1. Them hoa don.\n"
@@ -385,9 +534,15 @@ void inMenu() {
          << "5. Sua vat lieu mua theo ma hoa don.\n"
          << "6. Sua hoa don theo ma hoa don.\n"
          << "7. Thay doi thong tin hoa don theo ma khach hang.\n"
-         << "8.Tim kiem hoa don theo ma hoa don.\n"
-         << "9.Tim vat lieu co don gia cao nhat trong ma hoa don cu the"
-         << "10.Tim kiem hoa don co tong tien lon nhat"
+         << "8. Tim kiem hoa don theo ma hoa don.\n"
+         << "9. Tim vat lieu co don gia cao nhat trong ma hoa don cu the\n"
+         << "10.Tim kiem hoa don co tong tien lon nhat\n"
+         << "11.Sap xep hoa don theo tong tien tang dan\n"
+         << "12.Sap xep hoa don tang dan theo so loai vat vat lieu.\n"
+         << "13.Sap xep hoa don theo tong tien giam dan.\n"
+         << "14.Nhập vào từ bàn phím thông tin của Hóa đơn x , chèn Hóa đơn x vào danh sách sao cho vẫn đảm bảo danh sách được sắp xếp theo thứ tự tăng dần của tổng tiền từng Hóa đơn.\n"
+         << "15.Tinh tong tien cua tat ca cac Hoa don.\n"
+         << "16.Tinh doanh thu cua cua hang trong thang k(k duoc nhap tu ban phim).\n"
          << "0. Nau an.\n"
          << "Nhap lua chon:\t";
 }
@@ -411,14 +566,14 @@ void doMenu(ListHD &list) {
             cls;
             break;
         case 2:
-            ghiFileHoaDon(list);
-            cout << "Ghi thanh cong!\n";
-            pause; cls;
+            //ghiFileHoaDon(list);
+            //cout << "Ghi thanh cong!\n";
+            //pause; cls;
             break;
         case 3:
-            list = docFileHoaDon();
-            cout << "Danh sach hoa don sau khi doc: \n";
-            inListHoaDon(list);
+            //list = docFileHoaDon();
+            //cout << "Danh sach hoa don sau khi doc: \n";
+            //inListHoaDon(list);
             break;
         case 4:
             inListHoaDon(list);
@@ -444,6 +599,30 @@ void doMenu(ListHD &list) {
             hd = HD_tong_tien_cao_nhat(list);
             cout << "Hoa don co tong tien cao nhat la:\n";
             inHoaDon(hd);
+            break;
+        case 11:
+            cout << "Danh sach hoa don sau khi sap xep tang dan la\n";
+            SX_HD_tang_dan_theo_tong_tien(list);
+            inListHoaDon(list);
+            break;
+        case 12:
+            cout << "Danh sach hoa don sau khi sap xep tang dan so loai vat lieu la\n";
+            SX_HD_tang_dan_theo_so_loai_vat_lieu(list);
+            inListHoaDon(list);
+            break;
+        case 13:
+            cout << "Danh sach hoa don sau khi sap xep giam dan theo tong tien la\n";
+            SX_HD_giam_dan_theo_tong_tien(list);
+            inListHoaDon(list);
+            break;
+        case 14:
+            Them_HD_Tang_dan_theo_tong_tien(list);
+            break;
+        case 15:
+            cout << "Tong tien danh sach hoa don la:" << Tong_tien_danh_sach_HD(list) << "\n";
+            break;
+        case 16:
+            cout << "Tong doanh thu trong thang la:" << Doanh_thu_trong_thang(list) << "\n";
             break;
         default:
             cout << "Lua chon khong hop le!\n";
@@ -472,8 +651,8 @@ main() {
 9.Tim vat lieu co don gia cao nhat.
 10.Tim kiem hoa don co tong tien lon nhat
 11.Sap xep hoa don theo tong tien tang dan.
-12.Sap xep hoa don theo ma hoa don.
-13.Sap xep hoa don theo so luong mua tang dan.
+12.Sap xep hoa don tang dan theo so luong vat vat lieu.
+13.Sap xep hoa don theo tong tien giam dan.
 14.Nhập vào từ bàn phím thông tin của Hóa đơn x , chèn Hóa đơn x vào danh sách sao cho vẫn đảm bảo danh sách được sắp xếp theo thứ tự tăng dần của tổng tiền từng Hóa đơn.   
 15.Tinh tong tien cua tat ca cac Hoa don
 16.Tinh doanh thi cua cua hang trong thang k(k duoc nhap tu ban phim).
